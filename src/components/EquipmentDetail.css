@@ -1,0 +1,44 @@
+.equipment-detail {
+  border-radius: 10px;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.equipment-detail:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.detail-img {
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.checked-out-section {
+  border-top: 1px solid #e5e5e5;
+  padding-top: 1rem;
+}
+
+.checked-out-section ul {
+  max-width: 400px;
+}
+
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+
+@media (max-width: 768px) {
+  .equipment-detail {
+    text-align: center;
+  }
+
+  .detail-img {
+    max-height: 200px;
+  }
+}
+

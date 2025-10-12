@@ -1,0 +1,53 @@
+.equipment-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  border-radius: 10px;
+  transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  min-width: 320px;
+  max-width: 680px;
+}
+
+.equipment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.image-container {
+  flex-shrink: 0;
+}
+
+.equipment-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+}
+
+.info {
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: row; /* ✅ horizontal buttons */
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+@media (max-width: 768px) {
+  .equipment-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .button-group {
+    margin-top: 0.5rem;
+  }
+
+  .image-container {
+    margin-bottom: 0.5rem;
+  }
+}
