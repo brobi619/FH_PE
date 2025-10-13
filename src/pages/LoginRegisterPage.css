@@ -1,0 +1,20 @@
+.login-register-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+}
+
+.auth-card {
+  max-width: 420px;
+  background: #fff;
+  border-radius: 1rem;
+}
+
+.auth-card h2 {
+  font-weight: 600;
+}
+
+.btn {
+  min-width: 100px;
+}

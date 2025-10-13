@@ -1,7 +1,18 @@
+// src/components/Navbar.jsx
 import { Link, NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
 import "./Navbar.css";
 
 function Navbar() {
+  // TODO: replace this with actual session or context once login works
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Example: simulate restoring session from localStorage
+  useEffect(() => {
+    const user = localStorage.getItem("user");
+    if (user) setIsLoggedIn(true);
+  }, []);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
@@ -23,21 +34,40 @@ function Navbar() {
 
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <NavLink to="/" className="nav-link">
-                Equipment
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/profile" className="nav-link">
-                Profile
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/logout" className="nav-link text-danger">
-                Logout
-              </NavLink>
-            </li>
+            {isLoggedIn ? (
+              <>
+                <li className="nav-item">
+                  <NavLink to="/equipment" className="nav-link">
+                    Equipment
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink to="/profile" className="nav-link">
+                    Profile
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink
+                    to="/logout"
+                    className="nav-link text-danger"
+                    onClick={() => {
+                      localStorage.removeItem("user");
+                      setIsLoggedIn(false);
+                    }}
+                  >
+                    Logout
+                  </NavLink>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <NavLink to="/login" className="nav-link">
+                    Login / Register
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>
