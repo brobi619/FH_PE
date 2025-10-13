@@ -55,3 +55,17 @@
 
 .action-btn.delete { background: #ef4444; }
 .action-btn.delete:hover { background: #dc2626; }
+
+/* ✅ Return button — green and visible even on dimmed cards */
+.action-btn.return {
+  background-color: #10b981; /* bright green */
+  color: white;
+  font-weight: bold;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.action-btn.return:hover {
+  background-color: #059669;
+  transform: scale(1.08);
+}
+

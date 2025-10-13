@@ -6,13 +6,16 @@ function EquipmentListPage({ user }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const isAdmin = user?.role_id === 1; // ✅ determines admin status
+  // ✅ Determine admin status
+  const isAdmin = user?.role_id === 1;
 
-  useEffect(() => {
+  // ✅ Function to reload equipment after checkout/return
+  const fetchEquipment = () => {
     const API_URL = import.meta.env.DEV
       ? "http://localhost:3001/api/equipment"
       : "/api/equipment";
 
+    setLoading(true);
     fetch(API_URL)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch equipment data");
@@ -24,6 +27,10 @@ function EquipmentListPage({ user }) {
         setError("Error loading equipment data.");
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchEquipment();
   }, []);
 
   if (loading)
@@ -38,9 +45,14 @@ function EquipmentListPage({ user }) {
 
   return (
     <div className="text-center">
-      <h2 className="my-4">PE Equipment</h2>
-      {/* ✅ Pass isAdmin correctly */}
-      <EquipmentList equipment={equipment} isAdmin={isAdmin} />
+      <h2 className="my-4">All Equipment</h2>
+      {/* ✅ Pass user, admin flag, and refresh function */}
+      <EquipmentList
+        equipment={equipment}
+        user={user}
+        isAdmin={isAdmin}
+        refreshEquipment={fetchEquipment}
+      />
     </div>
   );
 }

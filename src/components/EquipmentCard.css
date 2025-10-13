@@ -37,6 +37,19 @@
   gap: 0.6rem;
 }
 
+/* Dim card when checked out */
+.equipment-card.checked-out {
+  opacity: 0.6;
+  filter: grayscale(0.2);
+  background-color: #f8f9fa; /* subtle grey background */
+  pointer-events: auto; /* allow button clicks */
+}
+
+/* Dim image a bit more */
+.equipment-card.checked-out img {
+  opacity: 0.8;
+}
+
 @media (max-width: 768px) {
   .equipment-card {
     flex-direction: column;
