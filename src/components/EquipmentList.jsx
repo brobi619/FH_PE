@@ -9,7 +9,7 @@ function EquipmentList({ equipment, isAdmin = false }) {
   return (
     <div className="equipment-list">
       {equipment.map((item) => (
-        <EquipmentCard key={item.id} data={item} isAdmin={false} />
+        <EquipmentCard key={item.id} data={item} isAdmin={isAdmin} />
       ))}
     </div>
   );

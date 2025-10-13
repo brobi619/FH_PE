@@ -1,22 +1,16 @@
-// src/components/Navbar.jsx
 import { Link, NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
-import "./Navbar.css";
 
-function Navbar() {
-  // TODO: replace this with actual session or context once login works
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Example: simulate restoring session from localStorage
-  useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) setIsLoggedIn(true);
-  }, []);
+function Navbar({ user }) {
+  const isAdmin = user?.role_id === 1;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
-        <Link className="navbar-brand fw-bold" to="/">
+        {/* 🧭 Smart brand link */}
+        <Link
+          className="navbar-brand fw-bold"
+          to={user ? "/equipment" : "/"}
+        >
           PE Equipment
         </Link>
 
@@ -33,42 +27,75 @@ function Navbar() {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            {isLoggedIn ? (
-              <>
-                <li className="nav-item">
-                  <NavLink to="/equipment" className="nav-link">
-                    Equipment
-                  </NavLink>
-                </li>
-                <li className="nav-item">
-                  <NavLink to="/profile" className="nav-link">
-                    Profile
-                  </NavLink>
-                </li>
-                <li className="nav-item">
-                  <NavLink
-                    to="/logout"
-                    className="nav-link text-danger"
-                    onClick={() => {
-                      localStorage.removeItem("user");
-                      setIsLoggedIn(false);
-                    }}
+          {/* 🧩 Only show menu items if logged in */}
+          {user && (
+            <ul className="navbar-nav ms-auto align-items-center">
+              <li className="nav-item">
+                <NavLink to="/equipment" className="nav-link">
+                  Equipment
+                </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <NavLink to="/profile" className="nav-link">
+                  Profile
+                </NavLink>
+              </li>
+
+              {/* 👑 Admin dropdown */}
+              {isAdmin && (
+                <li className="nav-item dropdown">
+                  <a
+                    className="nav-link dropdown-toggle"
+                    href="#"
+                    id="adminDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
                   >
-                    Logout
-                  </NavLink>
+                    Admin
+                  </a>
+                  <ul
+                    className="dropdown-menu dropdown-menu-end"
+                    aria-labelledby="adminDropdown"
+                  >
+                    <li>
+                      <NavLink className="dropdown-item" to="/approve-users">
+                        Approve Users
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink className="dropdown-item" to="/add-equipment">
+                        Add Equipment
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink className="dropdown-item" to="/manage-roles">
+                        Manage Roles
+                      </NavLink>
+                    </li>
+                  </ul>
                 </li>
-              </>
-            ) : (
-              <>
-                <li className="nav-item">
-                  <NavLink to="/login" className="nav-link">
-                    Login / Register
-                  </NavLink>
-                </li>
-              </>
-            )}
-          </ul>
+              )}
+
+              <li className="nav-item">
+                <NavLink to="/logout" className="nav-link text-danger">
+                  Logout
+                </NavLink>
+              </li>
+            </ul>
+          )}
+
+          {/* 🧑‍💻 If not logged in */}
+          {!user && (
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <NavLink to="/" className="nav-link">
+                  Login / Register
+                </NavLink>
+              </li>
+            </ul>
+          )}
         </div>
       </div>
     </nav>

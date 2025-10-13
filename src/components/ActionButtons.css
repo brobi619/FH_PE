@@ -1,64 +1,57 @@
+/* Container */
 .action-buttons {
   display: grid;
-  grid-template-columns: repeat(2, 40px); /* 2 buttons per row */
-  grid-auto-rows: 40px;
   gap: 0.5rem;
-  width: 90px; /* fixed width for right-hand button block */
-  justify-content: center;
-  align-content: center;
+  place-content: center;
 }
 
+/* Admin: 4 buttons = 2x2 grid */
+.action-buttons.admin {
+  grid-template-columns: repeat(2, 44px);
+  grid-auto-rows: 44px;
+  width: 100px; /* keeps a tidy block on the right */
+}
+
+/* Non-admin: 2 buttons side-by-side */
+.action-buttons.user {
+  grid-template-columns: repeat(2, 44px);
+  grid-auto-rows: 44px;
+  width: auto;
+}
+
+/* Square buttons (no Bootstrap btn) */
 .action-btn {
-  border-radius: 8px;
+  width: 44px;
+  aspect-ratio: 1 / 1;        /* <— enforces square */
   border: none;
-  color: white;
-  font-size: 1rem;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease-in-out;
+  font-size: 18px;            /* icon size */
+  color: #fff;
   cursor: pointer;
+  transition: transform .12s ease, opacity .12s ease, filter .12s ease;
+  padding: 0;                 /* kill any inherited padding */
+  line-height: 1;             /* prevent vertical stretch */
+  min-width: 0;               /* avoid Bootstrap min-width */
 }
 
-/* Hover effect for all buttons */
+/* Hover */
 .action-btn:hover {
-  transform: scale(1.08);
-  opacity: 0.9;
+  transform: scale(1.07);
+  opacity: 0.95;
 }
 
 /* Colors */
-.action-btn.checkout {
-  background-color: #3b82f6;
-}
-.action-btn.checkout:hover {
-  background-color: #2563eb;
-}
+.action-btn.checkout { background: #3b82f6; }
+.action-btn.checkout:hover { background: #2563eb; }
 
-.action-btn.issue {
-  background-color: #facc15;
-  color: #000;
-}
-.action-btn.issue:hover {
-  background-color: #eab308;
-}
+.action-btn.issue { background: #facc15; color: #1f2937; }
+.action-btn.issue:hover { background: #eab308; }
 
-.action-btn.edit {
-  background-color: #22c55e;
-}
-.action-btn.edit:hover {
-  background-color: #16a34a;
-}
+.action-btn.edit { background: #22c55e; }
+.action-btn.edit:hover { background: #16a34a; }
 
-.action-btn.delete {
-  background-color: #ef4444;
-}
-.action-btn.delete:hover {
-  background-color: #dc2626;
-}
-
-/* If only two buttons exist (non-admin), keep them side-by-side */
-.action-buttons:has(:nth-child(2):last-child) {
-  grid-template-columns: repeat(2, 40px);
-  grid-auto-rows: 40px;
-  width: 90px;
-}
+.action-btn.delete { background: #ef4444; }
+.action-btn.delete:hover { background: #dc2626; }
