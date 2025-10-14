@@ -11,7 +11,8 @@ function EquipmentCard({ data, isAdmin = false }) {
     picture_url,
     is_quantity_based,
     total_quantity,
-    checked_out_by, // ✅ new field from backend
+    available_quantity,
+    checked_out_by,
   } = data;
 
   const shortDesc =
@@ -19,16 +20,13 @@ function EquipmentCard({ data, isAdmin = false }) {
       ? description.substring(0, 97) + "..."
       : description || "No description available.";
 
-  // ✅ Get logged-in user from localStorage
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // ✅ Determine if this item is checked out
-  const isCheckedOut = !!checked_out_by;
+  const isCheckedOut = available_quantity <= 0;
   const isCheckedOutByUser = user && checked_out_by === user.id;
 
-  // ✅ Add CSS class if checked out
   const cardClass = `equipment-card card shadow-sm d-flex flex-row align-items-center justify-content-between p-3 ${
-    isCheckedOut ? "checked-out" : ""
+    isCheckedOut && !isCheckedOutByUser ? "dimmed" : ""
   }`;
 
   return (
@@ -50,28 +48,37 @@ function EquipmentCard({ data, isAdmin = false }) {
           <Link
             to={`/equipment/${id}`}
             className={`text-decoration-none ${
-              isCheckedOut ? "text-secondary" : "text-dark"
+              isCheckedOut && !isCheckedOutByUser ? "text-secondary" : "text-dark"
             }`}
           >
             {name}
           </Link>
         </h5>
 
-        <p className={`small mb-2 ${isCheckedOut ? "text-muted" : "text-muted"}`}>
-          {shortDesc}
-        </p>
+        <p className="small text-muted mb-2">{shortDesc}</p>
 
         {is_quantity_based && (
-          <div className="d-flex align-items-center gap-2">
-            <span className="small text-secondary">
-              {total_quantity} available
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            <span
+              className={`small ${
+                available_quantity > 0
+                  ? "text-secondary"
+                  : "text-danger fw-semibold"
+              }`}
+            >
+              {available_quantity > 0
+                ? `${available_quantity} available`
+                : "All checked out"}
             </span>
-            <QuantityPicker max={total_quantity} />
+
+            {available_quantity > 0 && (
+              <QuantityPicker max={available_quantity} equipmentId={id} />
+            )}
           </div>
         )}
 
-        {/* ✅ Checked-out label */}
-        {isCheckedOut && !isCheckedOutByUser && (
+        {/* Status messages */}
+        {!is_quantity_based && isCheckedOut && !isCheckedOutByUser && (
           <p className="small text-danger mt-1 mb-0 fw-semibold">
             Checked out by another user
           </p>

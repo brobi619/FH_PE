@@ -31,6 +31,17 @@
   border-bottom: none;
 }
 
+.equipment-detail.dimmed {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.equipment-detail.dimmed .btn-success {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
 
 @media (max-width: 768px) {
   .equipment-detail {

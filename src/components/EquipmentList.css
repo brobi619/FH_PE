@@ -2,13 +2,12 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 1rem;
+  gap: .5rem;
+  padding: .1rem;
 }
 
 /* Each card scales nicely */
 .equipment-card {
-  flex: 1 1 320px; /* min width 320px, grows until max */
+  flex: 1 1 400px; /* min width 320px, grows until max */
   max-width: 480px;
-  min-width: 300px;
 }

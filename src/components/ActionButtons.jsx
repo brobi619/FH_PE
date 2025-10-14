@@ -9,6 +9,13 @@ function ActionButtons({ item, isAdmin }) {
   const handleCheckout = async () => {
     if (!user) return alert("Please log in to check out equipment.");
 
+    // 🧮 Find quantity from the QuantityPicker for this specific item
+    const qtyInput = document.querySelector(
+      `[data-equipment-id="${item.id}"] input`
+    );
+    const quantity =
+      qtyInput && qtyInput.value ? parseInt(qtyInput.value, 10) : 1;
+
     try {
       const res = await fetch("http://localhost:3001/api/checkout", {
         method: "POST",
@@ -16,14 +23,14 @@ function ActionButtons({ item, isAdmin }) {
         body: JSON.stringify({
           equipment_id: item.id,
           user_id: user.id,
-          quantity_checked_out: 1,
+          quantity_checked_out: quantity, // ✅ send actual quantity
           notes: null,
         }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        alert(`✅ Successfully checked out: ${item.name}`);
+        alert(`✅ Checked out ${quantity} ${item.name}(s) successfully`);
         window.location.reload();
       } else {
         alert(`⚠️ ${data.message || "Failed to check out item."}`);

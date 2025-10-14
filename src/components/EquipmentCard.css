@@ -5,8 +5,6 @@
   flex-wrap: nowrap;
   border-radius: 10px;
   transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  min-width: 320px;
-  max-width: 680px;
 }
 
 .equipment-card:hover {
@@ -19,8 +17,8 @@
 }
 
 .equipment-img {
-  width: 80px;
-  height: 80px;
+  width: 75px;
+  aspect-ratio: 1 /1;
   object-fit: cover;
 }
 
@@ -29,13 +27,11 @@
   overflow: hidden;
 }
 
-.button-group {
+/* .button-group {
   display: flex;
-  flex-direction: row; /* ✅ horizontal buttons */
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-}
+} */
 
 /* Dim card when checked out */
 .equipment-card.checked-out {
