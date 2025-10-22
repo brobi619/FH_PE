@@ -4,6 +4,8 @@ import ActionButtons from "./ActionButtons";
 import QuantityPicker from "./QuantityPicker";
 import "./EquipmentCard.css";
 
+// change file name
+
 function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
   const {
     id,
