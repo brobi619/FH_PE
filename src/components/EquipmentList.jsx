@@ -1,4 +1,4 @@
-import EquipmentCard from "./EquipmentCard.jsx";
+import EquipmentCard from '/src/components/EquipmentCard.jsx';
 import "./EquipmentList.css";
 
 function EquipmentList({ equipment, user, isAdmin, refreshEquipment, isMyPage }) {
