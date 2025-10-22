@@ -1,28 +1,23 @@
-import { useState } from "react";
 import "./QuantityPicker.css";
 
-function QuantityPicker({ max, equipmentId }) {
-  const [qty, setQty] = useState(0);
+// Controlled QuantityPicker: parent supplies `value` and `onChange`.
+function QuantityPicker({ max, equipmentId, value = 0, onChange = () => {} }) {
+  const qty = Number(value || 0);
 
-  const increase = () => setQty((q) => Math.min(q + 1, max));
-  const decrease = () => setQty((q) => Math.max(q - 1, 0));
+  const increase = () => onChange(Math.min(qty + 1, max));
+  const decrease = () => onChange(Math.max(qty - 1, 0));
 
   const handleChange = (e) => {
-    const value = e.target.value.trim();
-
-    // Allow only numbers
-    if (!/^\d*$/.test(value)) return;
-
-    const numericValue = Number(value);
-
-    // Enforce range limits
-    if (numericValue < 0) setQty(0);
-    else if (numericValue > max) setQty(max);
-    else setQty(numericValue);
+    const raw = e.target.value.trim();
+    if (!/^\d*$/.test(raw)) return;
+    const numericValue = Number(raw);
+    if (numericValue < 0) onChange(0);
+    else if (numericValue > max) onChange(max);
+    else onChange(numericValue);
   };
 
   const handleBlur = () => {
-    if (!qty || qty < 0) setQty(0);
+    if (!qty || qty < 0) onChange(0);
   };
 
   return (

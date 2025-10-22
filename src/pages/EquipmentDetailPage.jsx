@@ -1,5 +1,6 @@
+// src/pages/EquipmentDetailPage.jsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import EquipmentDetail from "../components/EquipmentDetail";
 
 function EquipmentDetailPage() {
@@ -7,6 +8,10 @@ function EquipmentDetailPage() {
   const [equipment, setEquipment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ✅ Determine admin status from logged-in user
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = user?.role_id === 1;
 
   useEffect(() => {
     const API_URL = import.meta.env.DEV
@@ -40,7 +45,18 @@ function EquipmentDetailPage() {
 
   return (
     <div className="container mt-4">
-      <EquipmentDetail data={equipment} isAdmin={false} />
+      {/* ✅ Back link */}
+      <div className="mb-3">
+        <Link
+          to="/equipment"
+          className="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
+        >
+          <i className="fas fa-arrow-left"></i> Back to All Equipment
+        </Link>
+      </div>
+
+      {/* ✅ Pass real admin status */}
+      <EquipmentDetail data={equipment} isAdmin={isAdmin} />
     </div>
   );
 }

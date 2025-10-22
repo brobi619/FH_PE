@@ -6,6 +6,7 @@ function EquipmentDetail({ data, isAdmin }) {
   const checkedOutByUser =
     isCheckedOut && data.checked_out[0].user_id === user?.id;
 
+  // ✅ Checkout handler
   const handleCheckout = async () => {
     if (!user) {
       alert("Please log in to check out equipment.");
@@ -38,6 +39,7 @@ function EquipmentDetail({ data, isAdmin }) {
     }
   };
 
+  // ✅ Return handler
   const handleReturn = async () => {
     try {
       const res = await fetch("http://localhost:3001/api/equipment/return", {
@@ -63,6 +65,33 @@ function EquipmentDetail({ data, isAdmin }) {
     }
   };
 
+  // ✅ Admin handlers (placeholders for now)
+  const handleEdit = () => {
+    alert(`✏️ Edit clicked for ${data.name}`);
+    // Future: navigate(`/equipment/edit/${data.id}`)
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${data.name}"?`)) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/equipment/${data.id}`, {
+        method: "DELETE",
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("🗑️ Equipment deleted successfully.");
+        window.location.href = "/equipment";
+      } else {
+        alert(`⚠️ ${result.message || "Failed to delete equipment."}`);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Server error while deleting item.");
+    }
+  };
+
   return (
     <div
       className={`equipment-detail card shadow-sm p-4 ${
@@ -70,6 +99,7 @@ function EquipmentDetail({ data, isAdmin }) {
       }`}
     >
       <div className="row align-items-center">
+        {/* ✅ Image Section */}
         <div className="col-md-4 text-center">
           <img
             src={data.picture_url}
@@ -79,6 +109,7 @@ function EquipmentDetail({ data, isAdmin }) {
           />
         </div>
 
+        {/* ✅ Info Section */}
         <div className="col-md-8">
           <h2 className="fw-bold mb-2">{data.name}</h2>
           <p className="text-muted">{data.description}</p>
@@ -89,7 +120,8 @@ function EquipmentDetail({ data, isAdmin }) {
             </p>
           )}
 
-          <div className="mt-3 d-flex gap-2">
+          {/* ✅ Buttons Row */}
+          <div className="mt-3 d-flex flex-wrap gap-2">
             {checkedOutByUser ? (
               <button
                 className="btn btn-success d-flex align-items-center gap-2"
@@ -110,8 +142,28 @@ function EquipmentDetail({ data, isAdmin }) {
             <button className="btn btn-warning text-dark d-flex align-items-center gap-2">
               <i className="fas fa-exclamation-triangle"></i> Report Issue
             </button>
+
+            {/* ✅ Show only for admins */}
+            {isAdmin && (
+              <>
+                <button
+                  className="btn btn-success d-flex align-items-center gap-2"
+                  onClick={handleEdit}
+                >
+                  <i className="fas fa-pen"></i> Edit
+                </button>
+
+                <button
+                  className="btn btn-danger d-flex align-items-center gap-2"
+                  onClick={handleDelete}
+                >
+                  <i className="fas fa-trash"></i> Delete
+                </button>
+              </>
+            )}
           </div>
 
+          {/* ✅ Checked-out Users List */}
           {isCheckedOut && (
             <div className="mt-4">
               <hr />

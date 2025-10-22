@@ -32,8 +32,14 @@ function Navbar({ user }) {
             <ul className="navbar-nav ms-auto align-items-center">
               <li className="nav-item">
                 <NavLink to="/equipment" className="nav-link">
-                  Equipment
+                  All Equipment
                 </NavLink>
+              </li>
+
+              <li className="nav-item">
+                <Link className="nav-link" to="/my-equipment">
+                  My Equipment
+                </Link>
               </li>
 
               <li className="nav-item">

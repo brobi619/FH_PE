@@ -1,7 +1,7 @@
 import EquipmentCard from "./EquipmentCard";
 import "./EquipmentList.css";
 
-function EquipmentList({ equipment, user, isAdmin = false, refreshEquipment }) {
+function EquipmentList({ equipment, user, isAdmin, refreshEquipment, isMyPage }) {
   if (!equipment?.length) {
     return <p className="text-center mt-4 text-muted">No equipment available.</p>;
   }
@@ -15,6 +15,7 @@ function EquipmentList({ equipment, user, isAdmin = false, refreshEquipment }) {
           user={user}
           isAdmin={isAdmin}
           refreshEquipment={refreshEquipment}
+          isMyPage={isMyPage}
         />
       ))}
     </div>

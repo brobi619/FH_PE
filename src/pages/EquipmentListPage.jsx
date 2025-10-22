@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import EquipmentList from "../components/EquipmentList";
 import "./EquipmentListPage.css"; // 👈 We'll add sticky styling here
 
@@ -14,7 +14,7 @@ function EquipmentListPage({ user }) {
   const isAdmin = user?.role_id === 1;
 
   // ✅ Function to reload equipment after checkout/return
-  const fetchEquipment = () => {
+  const fetchEquipment = useCallback(() => {
     const API_URL = import.meta.env.DEV
       ? "http://localhost:3001/api/equipment"
       : "/api/equipment";
@@ -25,7 +25,47 @@ function EquipmentListPage({ user }) {
         if (!res.ok) throw new Error("Failed to fetch equipment data");
         return res.json();
       })
-      .then((data) => {
+      .then(async (data) => {
+        // If a user is logged in, also fetch their checked-out items and merge quantities
+        if (user && user.id) {
+          try {
+            const MY_URL = import.meta.env.DEV
+              ? `http://localhost:3001/api/equipment/my-equipment/${user.id}`
+              : `/api/equipment/my-equipment/${user.id}`;
+
+            const myRes = await fetch(MY_URL);
+            if (myRes.ok) {
+              const myData = await myRes.json();
+              // Build a map of equipment id -> checkout info
+              const myMap = new Map();
+              myData.forEach((row) => {
+                myMap.set(row.id, row);
+              });
+
+              // Merge into main equipment list
+              const merged = data.map((item) => {
+                const myRow = myMap.get(item.id);
+                if (myRow) {
+                  return {
+                    ...item,
+                    quantity_checked_out: myRow.quantity_checked_out,
+                    checkout_id: myRow.checkout_id,
+                    checked_out_by: myRow.checked_out_by,
+                  };
+                }
+                return item;
+              });
+
+              setEquipment(merged);
+              setFilteredEquipment(merged);
+              return;
+            }
+          } catch (err) {
+            console.error("Error fetching user's equipment for merge:", err);
+          }
+        }
+
+        // No user or failed merge — use original data
         setEquipment(data);
         setFilteredEquipment(data);
       })
@@ -34,11 +74,11 @@ function EquipmentListPage({ user }) {
         setError("Error loading equipment data.");
       })
       .finally(() => setLoading(false));
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchEquipment();
-  }, []);
+  }, [fetchEquipment]);
 
   // ✅ Filtering, searching, and sorting
   useEffect(() => {
