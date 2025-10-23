@@ -1,62 +1,52 @@
-// src/pages/EquipmentDetailPage.jsx
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import EquipmentDetail from "../components/EquipmentDetail";
+import { useParams } from "react-router-dom";
+import api from "../config/api"; // ✅ added import
+import "./EquipmentDetailPage.css";
 
 function EquipmentDetailPage() {
   const { id } = useParams();
   const [equipment, setEquipment] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Determine admin status from logged-in user
-  const user = JSON.parse(localStorage.getItem("user"));
-  const isAdmin = user?.role_id === 1;
-
   useEffect(() => {
-    const API_URL = import.meta.env.DEV
-      ? `http://localhost:3001/api/equipment/${id}`
-      : `/api/equipment/${id}`;
-
-    fetch(API_URL)
+    fetch(api.getEquipmentById(id)) // ✅ uses shared api helper
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch equipment details");
         return res.json();
       })
       .then((data) => setEquipment(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+      .catch((err) => {
+        console.error("Error fetching equipment:", err);
+        setError("Unable to load equipment details.");
+      });
   }, [id]);
 
-  if (loading) {
+  if (error) return <p className="text-center text-danger mt-4">{error}</p>;
+  if (!equipment)
     return (
       <div className="text-center mt-5">
         <div className="spinner-border text-primary" role="status"></div>
         <p className="mt-3 text-secondary">Loading equipment...</p>
       </div>
     );
-  }
-
-  if (error)
-    return <p className="text-center mt-4 text-danger">{error}</p>;
-
-  if (!equipment)
-    return <p className="text-center mt-4 text-muted">Item not found.</p>;
 
   return (
-    <div className="container mt-4">
-      {/* ✅ Back link */}
-      <div className="mb-3">
-        <Link
-          to="/equipment"
-          className="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
-        >
-          <i className="fas fa-arrow-left"></i> Back to All Equipment
-        </Link>
-      </div>
-
-      {/* ✅ Pass real admin status */}
-      <EquipmentDetail data={equipment} isAdmin={isAdmin} />
+    <div className="container mt-5">
+      <h2 className="text-center mb-4">{equipment.name}</h2>
+      <img
+        src={equipment.image_url}
+        alt={equipment.name}
+        className="img-fluid rounded mb-3"
+      />
+      <p>{equipment.description}</p>
+      <p>
+        <strong>Available:</strong>{" "}
+        {equipment.is_quantity_based
+          ? equipment.available_quantity
+          : equipment.checked_out_by
+          ? "Checked out"
+          : "Available"}
+      </p>
     </div>
   );
 }

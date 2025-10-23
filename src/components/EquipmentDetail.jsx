@@ -1,4 +1,5 @@
 import "./EquipmentDetail.css";
+import api from "../config/api"; // ✅ added
 
 function EquipmentDetail({ data, isAdmin }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -14,7 +15,7 @@ function EquipmentDetail({ data, isAdmin }) {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/api/checkout", {
+      const res = await fetch(api.checkout(), { // ✅ use helper
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -42,7 +43,7 @@ function EquipmentDetail({ data, isAdmin }) {
   // ✅ Return handler
   const handleReturn = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/equipment/return", {
+      const res = await fetch(api.returnEquipment(), { // ✅ use helper
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -65,17 +66,16 @@ function EquipmentDetail({ data, isAdmin }) {
     }
   };
 
-  // ✅ Admin handlers (placeholders for now)
+  // ✅ Admin actions
   const handleEdit = () => {
     alert(`✏️ Edit clicked for ${data.name}`);
-    // Future: navigate(`/equipment/edit/${data.id}`)
   };
 
   const handleDelete = async () => {
     if (!window.confirm(`Are you sure you want to delete "${data.name}"?`)) return;
 
     try {
-      const res = await fetch(`http://localhost:3001/api/equipment/${data.id}`, {
+      const res = await fetch(api.getEquipmentById(data.id), { // ✅ use helper
         method: "DELETE",
       });
 
@@ -99,7 +99,6 @@ function EquipmentDetail({ data, isAdmin }) {
       }`}
     >
       <div className="row align-items-center">
-        {/* ✅ Image Section */}
         <div className="col-md-4 text-center">
           <img
             src={data.picture_url}
@@ -109,7 +108,6 @@ function EquipmentDetail({ data, isAdmin }) {
           />
         </div>
 
-        {/* ✅ Info Section */}
         <div className="col-md-8">
           <h2 className="fw-bold mb-2">{data.name}</h2>
           <p className="text-muted">{data.description}</p>
@@ -120,7 +118,6 @@ function EquipmentDetail({ data, isAdmin }) {
             </p>
           )}
 
-          {/* ✅ Buttons Row */}
           <div className="mt-3 d-flex flex-wrap gap-2">
             {checkedOutByUser ? (
               <button
@@ -143,7 +140,6 @@ function EquipmentDetail({ data, isAdmin }) {
               <i className="fas fa-exclamation-triangle"></i> Report Issue
             </button>
 
-            {/* ✅ Show only for admins */}
             {isAdmin && (
               <>
                 <button
@@ -163,12 +159,10 @@ function EquipmentDetail({ data, isAdmin }) {
             )}
           </div>
 
-          {/* ✅ Checked-out Users List */}
           {isCheckedOut && (
             <div className="mt-4">
               <hr />
               <p className="fw-bold mb-3">Currently Checked Out By:</p>
-
               {data.checked_out.map((co) => (
                 <div
                   key={co.id}

@@ -1,57 +1,55 @@
-// src/pages/MyEquipmentPage.jsx
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+import api from "../config/api"; // ✅ added import
 import EquipmentList from "../components/EquipmentList";
 
 function MyEquipmentPage({ user }) {
-  const [equipment, setEquipment] = useState([]);
+  const [myEquipment, setMyEquipment] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Reusable fetch so child components can trigger a refresh
-  const fetchMyEquipment = useCallback(() => {
-    if (!user) return;
+
+  const fetchMyEquipment = () => {
+    if (!user?.id) return;
+
     setLoading(true);
-
-    const API_URL = import.meta.env.DEV
-      ? `http://localhost:3001/api/equipment/my-equipment/${user.id}`
-      : `/api/equipment/my-equipment/${user.id}`;
-
-    fetch(API_URL)
+    fetch(api.getMyEquipment(user.id)) // ✅ centralized call
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch user's checked-out equipment");
+        if (!res.ok) throw new Error("Failed to fetch your equipment");
         return res.json();
       })
-      .then((data) => setEquipment(data))
+      .then((data) => setMyEquipment(data))
       .catch((err) => {
-        console.error("Error fetching user's equipment:", err);
-        setError("Error loading equipment data.");
+        console.error("Error loading equipment:", err);
+        setError("Unable to load your equipment list.");
       })
       .finally(() => setLoading(false));
-  }, [user]);
+  };
 
   useEffect(() => {
     fetchMyEquipment();
-  }, [fetchMyEquipment]);
+  }, [user]);
 
-  if (!user)
-    return <p className="text-center mt-5 text-secondary">Please log in to view your equipment.</p>;
-
+  if (!user) return <p className="text-center mt-5">Please log in first.</p>;
   if (loading)
     return (
       <div className="text-center mt-5">
         <div className="spinner-border text-primary" role="status"></div>
-        <p className="mt-3 text-secondary">Loading your checked-out equipment...</p>
+        <p className="mt-3 text-secondary">Loading your equipment...</p>
       </div>
     );
-
-  if (error) return <p className="text-center mt-4 text-danger">{error}</p>;
+  if (error) return <p className="text-center text-danger mt-4">{error}</p>;
 
   return (
-    <div className="text-center">
-      <h2 className="my-4">My Checked-Out Equipment</h2>
-      {equipment.length > 0 ? (
-        <EquipmentList equipment={equipment} user={user} refreshEquipment={fetchMyEquipment} isMyPage={true} />
+    <div className="container mt-4">
+      <h2 className="text-center mb-4">My Equipment</h2>
+      {myEquipment.length === 0 ? (
+        <p className="text-center">You haven’t checked out any equipment yet.</p>
       ) : (
-        <p className="text-muted">You have no equipment checked out.</p>
+        <EquipmentList
+          equipment={myEquipment}
+          user={user}
+          isAdmin={false}
+          refreshEquipment={fetchMyEquipment}
+        />
       )}
     </div>
   );
