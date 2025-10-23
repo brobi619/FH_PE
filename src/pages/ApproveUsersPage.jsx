@@ -85,7 +85,7 @@ function ApproveUsersPage({ user }) {
               <tr key={u.id}>
                 <td>{u.first_name} {u.last_name}</td>
                 <td>{u.email}</td>
-                <td>{u.grade_id || "-"}</td>
+                <td>{u.grade || "-"}</td>
                 <td>{u.room || "-"}</td>
                 <td className="text-center">
                   <button
