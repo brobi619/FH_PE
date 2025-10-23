@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     'import.meta.env.VITE_API_URL': JSON.stringify(
       mode === 'production'
-        ? 'https://fhpe-backend.onrender.com'  // Your Render.com API URL
+        ? 'https://fhpe-backend.onrender.com'  // Remove /api from base URL
         : ''
     ),
   },
@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
-        changeOrigin: true
+        changeOrigin: true,
+        rewrite: (path) => path  // Don't rewrite the path
       }
     }
   }
