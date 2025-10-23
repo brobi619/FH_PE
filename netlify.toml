@@ -1,9 +1,9 @@
 [build]
-  command = "npm run build"
+  command = "npm rebuild esbuild && npm run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "16.20.0"
+  NODE_VERSION = "18.20.3"
 
 [[redirects]]
   from = "/*"
