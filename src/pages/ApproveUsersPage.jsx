@@ -1,50 +1,57 @@
 import { useEffect, useState } from "react";
+import api from "../config/api";
 
 function ApproveUsersPage({ user }) {
   const [pendingUsers, setPendingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Load pending users
   useEffect(() => {
-    const API_URL = import.meta.env.DEV
-      ? "http://localhost:3001/api/admin/pending-users"
-      : "/api/admin/pending-users";
+    const fetchPendingUsers = async () => {
+      try {
+        const res = await fetch(api.getPendingUsers());
+        if (!res.ok) throw new Error("Failed to fetch pending users");
+        const data = await res.json();
+        setPendingUsers(data);
+      } catch (err) {
+        console.error("Error fetching pending users:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    fetch(API_URL)
-      .then((res) => res.json())
-      .then((data) => setPendingUsers(data))
-      .catch((err) => console.error("Error fetching pending users:", err))
-      .finally(() => setLoading(false));
+    fetchPendingUsers();
   }, []);
 
   const handleApprove = async (id) => {
     if (!window.confirm("Approve this user?")) return;
 
-    const API_URL = import.meta.env.DEV
-      ? `http://localhost:3001/api/admin/approve/${id}`
-      : `/api/admin/approve/${id}`;
-
-    const res = await fetch(API_URL, { method: "PATCH" });
-    if (res.ok) {
-      alert("✅ User approved and notified via email.");
-      setPendingUsers((prev) => prev.filter((u) => u.id !== id));
-    } else {
-      alert("⚠️ Error approving user.");
+    try {
+      const res = await fetch(api.approveUser(id), { method: "PATCH" });
+      if (res.ok) {
+        alert("✅ User approved and notified via email.");
+        setPendingUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        alert("⚠️ Error approving user.");
+      }
+    } catch (err) {
+      console.error("Approve error:", err);
     }
   };
 
   const handleReject = async (id) => {
     if (!window.confirm("Reject and delete this user?")) return;
 
-    const API_URL = import.meta.env.DEV
-      ? `http://localhost:3001/api/admin/reject/${id}`
-      : `/api/admin/reject/${id}`;
-
-    const res = await fetch(API_URL, { method: "DELETE" });
-    if (res.ok) {
-      alert("🗑️ User rejected and notified via email.");
-      setPendingUsers((prev) => prev.filter((u) => u.id !== id));
-    } else {
-      alert("⚠️ Error rejecting user.");
+    try {
+      const res = await fetch(api.rejectUser(id), { method: "DELETE" });
+      if (res.ok) {
+        alert("🗑️ User rejected and notified via email.");
+        setPendingUsers((prev) => prev.filter((u) => u.id !== id));
+      } else {
+        alert("⚠️ Error rejecting user.");
+      }
+    } catch (err) {
+      console.error("Reject error:", err);
     }
   };
 
