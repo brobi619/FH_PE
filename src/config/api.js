@@ -27,5 +27,10 @@ export default {
   // Admin endpoints
   getPendingUsers: () => getApiUrl('/api/admin/pending-users'),
   approveUser: (id) => getApiUrl(`/api/admin/approve/${id}`),
-  rejectUser: (id) => getApiUrl(`/api/admin/reject/${id}`)
+  rejectUser: (id) => getApiUrl(`/api/admin/reject/${id}`),
+  
+  // Grade Endpoint
+  getGrades: () => getApiUrl("/api/grades")
 };
+
+  
