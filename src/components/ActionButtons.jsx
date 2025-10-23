@@ -1,4 +1,5 @@
 import "./ActionButtons.css";
+import api from "../config/api";
 
 function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -15,7 +16,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     try {
       const quantityToSend = item.is_quantity_based ? Number(selectedQty) || 1 : 1;
 
-      const res = await fetch("http://localhost:3001/api/checkout", {
+      const res = await fetch(api.checkout(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,7 +48,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     }
 
     try {
-      const res = await fetch("http://localhost:3001/api/equipment/return", {
+      const res = await fetch(api.returnEquipment(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

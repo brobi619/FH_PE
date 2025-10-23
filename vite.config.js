@@ -6,13 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target:
-          process.env.NODE_ENV === 'production'
-            ? 'https://fhpe-backend.onrender.com'
-            : 'http://localhost:3001',
-        changeOrigin: true,
-        secure: false,
-      },
-    },
-  },
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      }
+    }
+  }
 })
