@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import EquipmentList from "../components/EquipmentList";
-import "./EquipmentListPage.css"; // 👈 We'll add sticky styling here
+import api from "../config/api"; // ✅ Central API helper
+import "./EquipmentListPage.css";
 
 function EquipmentListPage({ user }) {
   const [equipment, setEquipment] = useState([]);
@@ -10,50 +11,39 @@ function EquipmentListPage({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [showAvailableOnly, setShowAvailableOnly] = useState(false);
 
-  // ✅ Determine admin status
   const isAdmin = user?.role_id === 1;
 
-  // ✅ Function to reload equipment after checkout/return
+  // ✅ Fetch all equipment and merge user-specific data
   const fetchEquipment = useCallback(() => {
-    const API_URL = import.meta.env.DEV
-      ? "http://localhost:3001/api/equipment"
-      : "/api/equipment";
-
     setLoading(true);
-    fetch(API_URL)
+
+    fetch(api.getAllEquipment())
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch equipment data");
         return res.json();
       })
       .then(async (data) => {
-        // If a user is logged in, also fetch their checked-out items and merge quantities
         if (user && user.id) {
           try {
-            const MY_URL = import.meta.env.DEV
-              ? `http://localhost:3001/api/equipment/my-equipment/${user.id}`
-              : `/api/equipment/my-equipment/${user.id}`;
-
-            const myRes = await fetch(MY_URL);
+            const myRes = await fetch(api.getMyEquipment(user.id));
             if (myRes.ok) {
               const myData = await myRes.json();
-              // Build a map of equipment id -> checkout info
-              const myMap = new Map();
-              myData.forEach((row) => {
-                myMap.set(row.id, row);
-              });
 
-              // Merge into main equipment list
+              // Build map of equipment id → checkout info
+              const myMap = new Map();
+              myData.forEach((row) => myMap.set(row.id, row));
+
+              // Merge user-specific info into main list
               const merged = data.map((item) => {
                 const myRow = myMap.get(item.id);
-                if (myRow) {
-                  return {
-                    ...item,
-                    quantity_checked_out: myRow.quantity_checked_out,
-                    checkout_id: myRow.checkout_id,
-                    checked_out_by: myRow.checked_out_by,
-                  };
-                }
-                return item;
+                return myRow
+                  ? {
+                      ...item,
+                      quantity_checked_out: myRow.quantity_checked_out,
+                      checkout_id: myRow.checkout_id,
+                      checked_out_by: myRow.checked_out_by,
+                    }
+                  : item;
               });
 
               setEquipment(merged);
@@ -65,7 +55,7 @@ function EquipmentListPage({ user }) {
           }
         }
 
-        // No user or failed merge — use original data
+        // Default case — no merge
         setEquipment(data);
         setFilteredEquipment(data);
       })
@@ -80,12 +70,11 @@ function EquipmentListPage({ user }) {
     fetchEquipment();
   }, [fetchEquipment]);
 
-  // ✅ Filtering, searching, and sorting
+  // ✅ Search, filter, and sort logic
   useEffect(() => {
     let filtered = [...equipment];
 
-    // Text search by name or description
-    if (searchTerm.trim() !== "") {
+    if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (item) =>
@@ -94,7 +83,6 @@ function EquipmentListPage({ user }) {
       );
     }
 
-    // Show only available equipment
     if (showAvailableOnly) {
       filtered = filtered.filter(
         (item) =>
@@ -103,7 +91,6 @@ function EquipmentListPage({ user }) {
       );
     }
 
-    // ✅ Sort alphabetically by name (case-insensitive)
     filtered.sort((a, b) =>
       a.name.toLowerCase().localeCompare(b.name.toLowerCase())
     );
@@ -151,7 +138,7 @@ function EquipmentListPage({ user }) {
         </div>
       </div>
 
-      {/* ✅ Pass user, admin flag, and refresh function */}
+      {/* ✅ Equipment List */}
       <EquipmentList
         equipment={filteredEquipment}
         user={user}
