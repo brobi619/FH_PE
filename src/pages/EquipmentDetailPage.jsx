@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../config/api"; // ✅ added import
-import "./EquipmentDetailPage.css";
 
 function EquipmentDetailPage() {
   const { id } = useParams();
