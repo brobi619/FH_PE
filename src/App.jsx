@@ -7,9 +7,11 @@ import EquipmentDetailPage from "./pages/EquipmentDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import LogoutPage from "./pages/LogoutPage";
 import MyEquipmentPage from "./pages/MyEquipmentPage";
-import ApproveUsersPage from "./pages/ApproveUsersPage.jsx";
+import ApproveUsersPage from "./pages/ApproveUsersPage";
+import ManageUsers from "./pages/ManageUsers";
+import AddEquipmentPage from "./pages/AddEquipmentPage"; // ✅ new page
 
-// ✅ Reusable protected route component
+// ✅ Protected route component
 function ProtectedRoute({ user, children }) {
   if (!user) {
     return <Navigate to="/" replace />;
@@ -35,12 +37,10 @@ function AdminRoute({ user, children }) {
 
 function App() {
   const [user, setUser] = useState(() => {
-  const stored = localStorage.getItem("user");
-  return stored ? JSON.parse(stored) : null;
-});
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  });
 
-
-  // Load from localStorage on refresh
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
@@ -56,7 +56,7 @@ function App() {
             <Route path="/" element={<LoginRegisterPage setUser={setUser} />} />
             <Route path="/logout" element={<LogoutPage setUser={setUser} />} />
 
-            {/* Protected Routes - Require Login */}
+            {/* Protected Routes */}
             <Route
               path="/equipment"
               element={
@@ -90,12 +90,28 @@ function App() {
               }
             />
 
-            {/* Admin-Only Route */}
+            {/* Admin-Only Routes */}
             <Route
               path="/approve-users"
               element={
                 <AdminRoute user={user}>
                   <ApproveUsersPage user={user} />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/manage-users"
+              element={
+                <AdminRoute user={user}>
+                  <ManageUsers user={user} />
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/add-equipment"
+              element={
+                <AdminRoute user={user}>
+                  <AddEquipmentPage user={user} />
                 </AdminRoute>
               }
             />

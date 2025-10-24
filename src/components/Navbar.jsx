@@ -7,10 +7,7 @@ function Navbar({ user }) {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
         {/* 🧭 Smart brand link */}
-        <Link
-          className="navbar-brand fw-bold"
-          to={user ? "/equipment" : "/"}
-        >
+        <Link className="navbar-brand fw-bold" to={user ? "/equipment" : "/"}>
           PE Equipment
         </Link>
 
@@ -76,8 +73,8 @@ function Navbar({ user }) {
                       </NavLink>
                     </li>
                     <li>
-                      <NavLink className="dropdown-item" to="/manage-roles">
-                        Manage Roles
+                      <NavLink className="dropdown-item" to="/manage-users">
+                        Manage Users
                       </NavLink>
                     </li>
                   </ul>
