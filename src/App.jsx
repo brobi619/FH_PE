@@ -9,7 +9,8 @@ import LogoutPage from "./pages/LogoutPage";
 import MyEquipmentPage from "./pages/MyEquipmentPage";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
 import ManageUsers from "./pages/ManageUsers";
-import AddEquipmentPage from "./pages/AddEquipmentPage"; // ✅ new page
+import AddEquipmentPage from "./pages/AddEquipmentPage";
+import EquipmentEditPage from "./pages/EquipmentEditPage"; // ✅ new admin-only page
 
 // ✅ Protected route component
 function ProtectedRoute({ user, children }) {
@@ -73,6 +74,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* ✅ NEW ADMIN-ONLY EDIT ROUTE */}
+            <Route
+              path="/equipment/:id/edit"
+              element={
+                <AdminRoute user={user}>
+                  <EquipmentEditPage user={user} />
+                </AdminRoute>
+              }
+            />
+
             <Route
               path="/my-equipment"
               element={

@@ -1,6 +1,6 @@
 // src/pages/AddEquipmentPage.jsx
 import { useState } from "react";
-import "./ManageUsers.css"; // ✅ Reuses toggle switch styles
+import "./ManageUsers.css"; // ✅ Reuse toggle switch styles
 
 function AddEquipmentPage() {
   const [formData, setFormData] = useState({
@@ -15,16 +15,52 @@ function AddEquipmentPage() {
 
   const [message, setMessage] = useState("");
   const [success, setSuccess] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
+  // ✅ Handle text/number field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Handle toggle switches
   const handleToggle = (name) => {
     setFormData((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
+  // ✅ Handle file uploads to Cloudflare R2
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setFormData((prev) => ({ ...prev, picture_url: data.url }));
+        setMessage("✅ Image uploaded successfully!");
+        setSuccess(true);
+      } else {
+        throw new Error(data.message || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      setMessage("⚠️ Error uploading image.");
+      setSuccess(false);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // ✅ Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -49,11 +85,10 @@ function AddEquipmentPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add equipment.");
 
-      // ✅ Success feedback
       setMessage("✅ Equipment added successfully!");
       setSuccess(true);
 
-      // ✅ Reset form fields after successful submit
+      // ✅ Reset form after successful add
       setFormData({
         name: "",
         description: "",
@@ -64,7 +99,7 @@ function AddEquipmentPage() {
         total_quantity: "",
       });
 
-      // ✅ Hide message after a few seconds (optional)
+      // Auto-clear message after 3s
       setTimeout(() => {
         setMessage("");
         setSuccess(false);
@@ -72,6 +107,7 @@ function AddEquipmentPage() {
     } catch (err) {
       console.error("Error adding equipment:", err);
       setMessage("⚠️ Failed to add equipment.");
+      setSuccess(false);
     }
   };
 
@@ -89,6 +125,44 @@ function AddEquipmentPage() {
         </div>
       )}
 
+      {/* ✅ Image Upload Section */}
+      <div className="mb-4 text-center">
+        {formData.picture_url ? (
+          <img
+            src={formData.picture_url}
+            alt="Preview"
+            style={{
+              width: "200px",
+              height: "200px",
+              objectFit: "cover",
+              borderRadius: "8px",
+            }}
+          />
+        ) : (
+          <p>No image selected</p>
+        )}
+
+        <div className="mt-3">
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            id="fileUpload"
+            style={{ display: "none" }}
+            onChange={handleFileSelect}
+          />
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={() => document.getElementById("fileUpload").click()}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "📸 Upload Photo"}
+          </button>
+        </div>
+      </div>
+
+      {/* ✅ Form Fields */}
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
           <label className="form-label">Name</label>
@@ -124,18 +198,6 @@ function AddEquipmentPage() {
           />
         </div>
 
-        <div className="mb-3">
-          <label className="form-label">Picture URL</label>
-          <input
-            type="text"
-            name="picture_url"
-            className="form-control"
-            value={formData.picture_url}
-            onChange={handleChange}
-            placeholder="https://example.com/image.jpg"
-          />
-        </div>
-
         {/* ✅ Quantity Based Toggle */}
         <div className="d-flex align-items-center justify-content-between mb-3">
           <label className="form-label mb-0">Quantity Based</label>
@@ -149,7 +211,7 @@ function AddEquipmentPage() {
           </label>
         </div>
 
-        {/* ✅ Only show quantity field if toggle is ON */}
+        {/* ✅ Show Total Quantity if Enabled */}
         {formData.is_quantity_based && (
           <div className="mb-3">
             <label className="form-label">Total Quantity</label>

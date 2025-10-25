@@ -30,7 +30,12 @@ export default {
   rejectUser: (id) => getApiUrl(`/api/admin/reject/${id}`),
   
   // Grade Endpoint
-  getGrades: () => getApiUrl("/api/grades")
+  getGrades: () => getApiUrl("/api/grades"),
+
+  //edit equipment endpoints
+  updateEquipment: (id) => `/api/equipment/${id}`,
+  deleteEquipment: (id) => `/api/equipment/${id}`,
+
 };
 
   
