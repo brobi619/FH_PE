@@ -10,7 +10,8 @@ import MyEquipmentPage from "./pages/MyEquipmentPage";
 import ApproveUsersPage from "./pages/ApproveUsersPage";
 import ManageUsers from "./pages/ManageUsers";
 import AddEquipmentPage from "./pages/AddEquipmentPage";
-import EquipmentEditPage from "./pages/EquipmentEditPage"; // ✅ new admin-only page
+import EquipmentEditPage from "./pages/EquipmentEditPage";
+import ReportIssuePage from "./pages/ReportIssuePage.jsx";
 
 // ✅ Protected route component
 function ProtectedRoute({ user, children }) {
@@ -75,7 +76,17 @@ function App() {
               }
             />
 
-            {/* ✅ NEW ADMIN-ONLY EDIT ROUTE */}
+            {/* ✅ New route: Any logged-in user can report an issue */}
+            <Route
+              path="/equipment/:id/report"
+              element={
+                <ProtectedRoute user={user}>
+                  <ReportIssuePage user={user} />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin-only edit route */}
             <Route
               path="/equipment/:id/edit"
               element={

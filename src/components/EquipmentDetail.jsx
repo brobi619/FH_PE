@@ -1,7 +1,9 @@
 import "./EquipmentDetail.css";
-import api from "../config/api"; // ✅ added
+import api from "../config/api";
+import { useNavigate } from "react-router-dom";
 
 function EquipmentDetail({ data, isAdmin }) {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const isCheckedOut = data.checked_out?.length > 0;
   const checkedOutByUser =
@@ -15,7 +17,7 @@ function EquipmentDetail({ data, isAdmin }) {
     }
 
     try {
-      const res = await fetch(api.checkout(), { // ✅ use helper
+      const res = await fetch(api.checkout(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,7 +45,7 @@ function EquipmentDetail({ data, isAdmin }) {
   // ✅ Return handler
   const handleReturn = async () => {
     try {
-      const res = await fetch(api.returnEquipment(), { // ✅ use helper
+      const res = await fetch(api.returnEquipment(), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,16 +68,25 @@ function EquipmentDetail({ data, isAdmin }) {
     }
   };
 
+  // ✅ Navigate to Report Issue page
+  const handleReportIssue = () => {
+    if (!user) {
+      alert("Please log in to report an issue.");
+      return;
+    }
+    navigate(`/equipment/${data.id}/report`);
+  };
+
   // ✅ Admin actions
   const handleEdit = () => {
-    alert(`✏️ Edit clicked for ${data.name}`);
+    navigate(`/equipment/${data.id}/edit`);
   };
 
   const handleDelete = async () => {
     if (!window.confirm(`Are you sure you want to delete "${data.name}"?`)) return;
 
     try {
-      const res = await fetch(api.getEquipmentById(data.id), { // ✅ use helper
+      const res = await fetch(api.getEquipmentById(data.id), {
         method: "DELETE",
       });
 
@@ -99,6 +110,7 @@ function EquipmentDetail({ data, isAdmin }) {
       }`}
     >
       <div className="row align-items-center">
+        {/* ✅ Image */}
         <div className="col-md-4 text-center">
           <img
             src={data.picture_url}
@@ -108,6 +120,7 @@ function EquipmentDetail({ data, isAdmin }) {
           />
         </div>
 
+        {/* ✅ Details and Actions */}
         <div className="col-md-8">
           <h2 className="fw-bold mb-2">{data.name}</h2>
           <p className="text-muted">{data.description}</p>
@@ -118,6 +131,7 @@ function EquipmentDetail({ data, isAdmin }) {
             </p>
           )}
 
+          {/* ✅ Action Buttons */}
           <div className="mt-3 d-flex flex-wrap gap-2">
             {checkedOutByUser ? (
               <button
@@ -136,7 +150,11 @@ function EquipmentDetail({ data, isAdmin }) {
               </button>
             )}
 
-            <button className="btn btn-warning text-dark d-flex align-items-center gap-2">
+            {/* ⚠️ Report Issue (navigates to /equipment/:id/report) */}
+            <button
+              className="btn btn-warning text-dark d-flex align-items-center gap-2"
+              onClick={handleReportIssue}
+            >
               <i className="fas fa-exclamation-triangle"></i> Report Issue
             </button>
 
@@ -159,6 +177,7 @@ function EquipmentDetail({ data, isAdmin }) {
             )}
           </div>
 
+          {/* ✅ Checked Out Info */}
           {isCheckedOut && (
             <div className="mt-4">
               <hr />

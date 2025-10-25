@@ -1,38 +1,13 @@
+import { useNavigate } from "react-router-dom";
 import "./ActionButtons.css";
-import api from "../config/api";
-import { Link } from "react-router-dom";
 
 function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
-
-  // Is *anyone* currently checked out on this item?
   const isCheckedOut = !!item.checked_out_by;
-
-  // Is the CURRENT logged-in user the one who has it?
   const isCheckedOutByUser = user && item.checked_out_by === user.id;
 
-  // For quantity-based items (like balls, cones, etc),
-  // we should only block checkout if there are 0 left.
-  const isOutOfStock =
-    item.is_quantity_based && Number(item.available_quantity) <= 0;
-
-  // For single items (like 1 speaker),
-  // block checkout if someone else already has it.
-  const isLockedBySomeoneElse =
-    !item.is_quantity_based && isCheckedOut && !isCheckedOutByUser;
-
-  // Final rule: should the checkout button be disabled?
-  const disableCheckout = isOutOfStock || isLockedBySomeoneElse;
-
-  // Text / tooltip for the checkout button
-  let checkoutTitle = "Check Out";
-  if (isOutOfStock) {
-    checkoutTitle = "Out of Stock";
-  } else if (isLockedBySomeoneElse) {
-    checkoutTitle = "Checked Out";
-  }
-
-  // ✅ Handle checkout
+  /* ✅ Handle checkout */
   const handleCheckout = async () => {
     if (!user) {
       alert("Please log in to check out equipment.");
@@ -40,11 +15,9 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     }
 
     try {
-      const quantityToSend = item.is_quantity_based
-        ? Number(selectedQty) || 1
-        : 1;
+      const quantityToSend = item.is_quantity_based ? Number(selectedQty) || 1 : 1;
 
-      const res = await fetch(api.checkout(), {
+      const res = await fetch("http://localhost:3001/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -58,7 +31,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
       const data = await res.json();
       if (res.ok) {
         alert(`✅ Successfully checked out: ${item.name}`);
-        refreshEquipment?.(); // refresh parent data
+        refreshEquipment?.();
       } else {
         alert(`⚠️ ${data.message || "Failed to check out item."}`);
       }
@@ -68,7 +41,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     }
   };
 
-  // ✅ Handle return
+  /* ✅ Handle return */
   const handleReturn = async () => {
     if (!user) {
       alert("Please log in first.");
@@ -76,7 +49,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     }
 
     try {
-      const res = await fetch(api.returnEquipment(), {
+      const res = await fetch("http://localhost:3001/api/equipment/return", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -88,7 +61,7 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
       const data = await res.json();
       if (res.ok) {
         alert(data.message || "✅ Item returned successfully.");
-        refreshEquipment?.(); // refresh after returning
+        refreshEquipment?.();
       } else {
         alert(`⚠️ ${data.message || "Failed to return item."}`);
       }
@@ -98,9 +71,45 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
     }
   };
 
+  /* ✅ Handle edit (admin only) */
+  const handleEdit = () => {
+    navigate(`/equipment/${item.id}/edit`);
+  };
+
+  /* ✅ Handle delete (admin only) */
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${item.name}"?`)) return;
+
+    try {
+      const res = await fetch(`http://localhost:3001/api/equipment/${item.id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("🗑️ Equipment deleted successfully.");
+        refreshEquipment?.();
+      } else {
+        alert(`⚠️ ${data.message || "Failed to delete equipment."}`);
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert("Server error deleting equipment.");
+    }
+  };
+
+  /* ✅ Handle report issue (redirect to page) */
+  const handleReportIssue = () => {
+    if (!user) {
+      alert("Please log in to report an issue.");
+      return;
+    }
+    navigate(`/equipment/${item.id}/report`);
+  };
+
   return (
     <div className={`action-buttons ${isAdmin ? "admin" : "user"}`}>
-      {/* If THIS user already has this item, show Return */}
+      {/* ✅ Return if checked out by user */}
       {isCheckedOutByUser ? (
         <button
           className="action-btn return"
@@ -110,34 +119,40 @@ function ActionButtons({ item, isAdmin, refreshEquipment, selectedQty = 1 }) {
           <i className="fas fa-undo" />
         </button>
       ) : (
-        // Otherwise show Checkout, with our smarter rules
         <button
           className="action-btn checkout"
-          title={checkoutTitle}
-          onClick={!disableCheckout ? handleCheckout : undefined}
-          disabled={disableCheckout}
+          title={isCheckedOut ? "Checked Out" : "Check Out"}
+          onClick={!isCheckedOut ? handleCheckout : undefined}
+          disabled={isCheckedOut}
         >
           <i className="fas fa-shopping-cart" />
         </button>
       )}
 
-      {/* Report Issue (future condition report flow) */}
-      <button className="action-btn issue" title="Report Issue">
+      {/* ⚠️ Report Issue (redirects instead of modal) */}
+      <button
+        className="action-btn issue"
+        title="Report Issue"
+        onClick={handleReportIssue}
+      >
         <i className="fas fa-exclamation-triangle" />
       </button>
 
-      {/* Admin-only controls */}
+      {/* 🛠 Admin Controls */}
       {isAdmin && (
         <>
-          <Link
-            to={`/equipment/${item.id}/edit`}
+          <button
             className="action-btn edit"
             title="Edit"
+            onClick={handleEdit}
           >
             <i className="fas fa-pen" />
-          </Link>
-
-          <button className="action-btn delete" title="Delete">
+          </button>
+          <button
+            className="action-btn delete"
+            title="Delete"
+            onClick={handleDelete}
+          >
             <i className="fas fa-trash" />
           </button>
         </>

@@ -4,8 +4,6 @@ import ActionButtons from "./ActionButtons";
 import QuantityPicker from "./QuantityPicker";
 import "./EquipmentCard.css";
 
-// change file name
-
 function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
   const {
     id,
@@ -16,7 +14,10 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
     available_quantity,
     quantity_checked_out,
     checked_out_by,
+    current_condition, // ✅ field now matches backend
   } = data;
+
+  const condition = current_condition || data.latest_condition; // fallback just in case
 
   const shortDesc =
     description?.length > 100
@@ -24,7 +25,6 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
       : description || "No description available.";
 
   const user = JSON.parse(localStorage.getItem("user"));
-
   const isCheckedOut = available_quantity <= 0;
   const isCheckedOutByUser = user && checked_out_by === user.id;
 
@@ -32,12 +32,9 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
     isCheckedOut && !isCheckedOutByUser ? "dimmed" : ""
   }`;
 
-  // Per-card selected quantity (for quantity-based items)
+  // Per-card selected quantity
   const [selectedQty, setSelectedQty] = useState(1);
 
-  // Compute a reliable numeric available quantity:
-  // Prefer `available_quantity` when it's a finite number, otherwise try to compute
-  // from total_quantity - checked_out_quantity if provided by the API.
   const getNumeric = (v) => {
     const n = Number(v);
     return Number.isFinite(n) ? n : undefined;
@@ -45,14 +42,29 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
 
   const numericAvailable =
     getNumeric(available_quantity) ??
-    (getNumeric(data.total_quantity) !== undefined && getNumeric(data.checked_out_quantity) !== undefined
+    (getNumeric(data.total_quantity) !== undefined &&
+    getNumeric(data.checked_out_quantity) !== undefined
       ? getNumeric(data.total_quantity) - getNumeric(data.checked_out_quantity)
       : undefined);
+
+  // ✅ Helper for condition badge
+  const getConditionBadge = (condition) => {
+    switch (condition) {
+      case "Usable":
+        return <span className="badge bg-success">Usable</span>;
+      case "Needs Repair":
+        return <span className="badge bg-warning text-dark">Needs Repair</span>;
+      case "Broken / Unusable":
+        return <span className="badge bg-danger">Broken / Unusable</span>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className={cardClass}>
       {/* Left: Image */}
-      <div className="image-container me-3">
+      <div className="image-container me-3 position-relative">
         <Link to={`/equipment/${id}`}>
           <img
             src={picture_url}
@@ -60,20 +72,39 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
             className="equipment-img img-fluid rounded"
           />
         </Link>
+
+        {/* ✅ Condition badge over image */}
+        {condition && (
+          <div
+            className="position-absolute top-0 start-0 m-2"
+            style={{ zIndex: 2 }}
+          >
+            {getConditionBadge(condition)}
+          </div>
+        )}
       </div>
 
       {/* Middle: Info */}
       <div className="info flex-grow-1 text-start">
-        <h5 className="fw-bold mb-1">
-          <Link
-            to={`/equipment/${id}`}
-            className={`text-decoration-none ${
-              isCheckedOut && !isCheckedOutByUser ? "text-secondary" : "text-dark"
-            }`}
-          >
-            {name}
-          </Link>
-        </h5>
+        <div className="d-flex align-items-center justify-content-between">
+          <h5 className="fw-bold mb-1">
+            <Link
+              to={`/equipment/${id}`}
+              className={`text-decoration-none ${
+                isCheckedOut && !isCheckedOutByUser
+                  ? "text-secondary"
+                  : "text-dark"
+              }`}
+            >
+              {name}
+            </Link>
+          </h5>
+
+          {/* ✅ Condition badge next to name (fallback if not using overlay) */}
+          {!condition ? null : (
+            <div className="d-md-none">{getConditionBadge(condition)}</div>
+          )}
+        </div>
 
         <p className="small text-muted mb-2">{shortDesc}</p>
 
@@ -82,33 +113,38 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
             {numericAvailable !== undefined ? (
               <span
                 className={`small ${
-                  numericAvailable > 0 ? "text-secondary" : "text-danger fw-semibold"
+                  numericAvailable > 0
+                    ? "text-secondary"
+                    : "text-danger fw-semibold"
                 }`}
               >
-                {numericAvailable > 0 ? `${numericAvailable} available` : "0 available"}
+                {numericAvailable > 0
+                  ? `${numericAvailable} available`
+                  : "0 available"}
               </span>
-            ) : (
-              // If numeric available is unknown but we have the user's checked qty, show that instead
-              quantity_checked_out ? (
-                <span className="small text-secondary">
-                  {`${quantity_checked_out} checked out by you`}
-                </span>
-              ) : null
-            )}
+            ) : quantity_checked_out ? (
+              <span className="small text-secondary">
+                {`${quantity_checked_out} checked out by you`}
+              </span>
+            ) : null}
 
-            {/* Hide picker on the My Equipment page or when the current user already has this item checked out; otherwise show if numericAvailable is undefined or > 0 */}
-            {!isMyPage && !isCheckedOutByUser && (numericAvailable === undefined || numericAvailable > 0) && (
-              <QuantityPicker
-                max={numericAvailable !== undefined ? numericAvailable : (Number(data.total_quantity) || 1)}
-                equipmentId={id}
-                value={selectedQty}
-                onChange={setSelectedQty}
-              />
-            )}
+            {!isMyPage &&
+              !isCheckedOutByUser &&
+              (numericAvailable === undefined || numericAvailable > 0) && (
+                <QuantityPicker
+                  max={
+                    numericAvailable !== undefined
+                      ? numericAvailable
+                      : Number(data.total_quantity) || 1
+                  }
+                  equipmentId={id}
+                  value={selectedQty}
+                  onChange={setSelectedQty}
+                />
+              )}
           </div>
         )}
 
-        {/* Status messages */}
         {!is_quantity_based && isCheckedOut && !isCheckedOutByUser && (
           <p className="small text-danger mt-1 mb-0 fw-semibold">
             Checked out by another user
@@ -117,9 +153,9 @@ function EquipmentCard({ data, isAdmin, refreshEquipment, isMyPage }) {
         {isCheckedOutByUser && (
           <p className="small text-success mt-1 mb-0 fw-semibold">
             {is_quantity_based
-              ? (quantity_checked_out !== undefined && quantity_checked_out !== null
-                  ? `You have ${quantity_checked_out} checked out`
-                  : "You have this checked out")
+              ? quantity_checked_out
+                ? `You have ${quantity_checked_out} checked out`
+                : "You have this checked out"
               : "You have this checked out"}
           </p>
         )}
